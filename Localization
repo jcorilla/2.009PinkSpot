@@ -1,0 +1,82 @@
+## Light assumed to be at center, anchors at left corner and on light (for method 1)
+## height is difference in height of light and stage, Width = width of stage
+## HEIGHT is NEEDED from calibration for a 2 anchor method
+## Known variables from calibration
+H = "height"
+W = "width"
+
+## Assumes Light is in middle
+## Coordinate of light is (W/2, 0) = (L0, 0)
+
+## DCoLi = Distance from Stage corner to light
+## Flat_DCoLi = x-y distance, using the known height of lights
+
+Flat_DCoLi =(DCoLi**2 - H**2) **.5
+
+#Coordinate of stage anchor is (0, sq(Flat_DCoLi**2 - (W/2)**2)) = (0, A0)
+
+#Inputs, Corner1. Other one depends on where 2nd anchor is
+DIST_TLight = "Tag to light anchor Distance"
+DIST_TCorner1 = "Tag to left (from audience) corner stage anchor Distance"
+DIST_TConer2 = "Tag to right corner stage anchor distance"
+
+
+
+#METHOD 1
+#Non-coordinate Method
+#As long as there is some way to know H and Flat_DCoLi, Method should work regardless of light position
+#Begininning Angle Aa, angle from light to anchor, (No point on stage should result in a smaller angle)
+
+Aa= arccos ((W/2)/Flat_DCoLi)
+
+#Anchor-Light-Tag angle - law of cosines
+
+
+ALT= arccos ((DIST_TCorner**2 - DIST_TLight**2 - Flat_DCoLi**2)/(2 * DIST_TLight * Flat_DCoLi))
+
+## From 0 - 180, [Actually from Aa - (180-Aa) from Light at Center)
+LIGHTANGLE= Aa + ALT
+
+TILT = arccos(H/DIST_TLight)
+
+
+#METHOD 2
+# Coordinate Method, "Trilateration"
+# Assumes Anchor as both stage corners, Corner one is (0,MM) Corner two is  (W,MM)
+
+#How the Math begins
+#DIST_TCorner1**2 = x**2 + (y-MM)**2
+#DIST_TCorner2**2 = (x-W)**2 + (y-MM)**2
+#DIST_TCorner1**2 - DIST_TCorner2**2 = x**2 - (x-W)**2
+
+x = (DIST_TCorner1**2 - DIST_TCorner2**2 + W**2)/ (2*W)
+
+# SUB
+# Since stage only has positive coordinates, we would want only positive root
+y = (DIST_TCorner**2 - x**2)**.5 + MM
+
+# (x,y) known, light coordinate known through calibration (L0, 0)
+if x < L0:
+    LIGHTANGLE = arctan(y/(x - L0))
+
+else if x = L0:
+    # Straight ahead
+    LIGHTANGLE = 90
+else:
+    LIGHTANGLE = arctan(y/L0-x) + 90
+
+TILT = arccos(H/(x**2 + y**2))
+
+
+## An anchor on the light seems nice for calibrtion (+ method 1)
+## No dealing with positive or negative values (+ method 1)
+## Law of cosine high round off errors for low angle - when tag is REALLY close to stage anchor ( - method 1)
+
+## No round off errors from trig ( I believe)  (+ method 2)
+## Anchors at corners, -how to find light position? :( (- method 2)
+## Two possible position ( we can discount negative values with our stage coordinate system ( 0 method 2)
+
+
+
+## Method 2 relies on both anchors having a common x or y value (works easily for stage anchors)
+## Can be used for stage + light anchor combo, but would result in a coordinate system diagonal to stage
