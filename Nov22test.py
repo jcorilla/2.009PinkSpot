@@ -20,7 +20,7 @@ Relevant Channels (Mode 4)
 Currently NOT in a loop, just runs once
 """
 
-import pysimpledmx # make sure it is in same home directory
+import pysimpledmx # make sure it ais in same home directory
 import time
 
 COMport = "/dev/cu.usbserial-ENYXTLPV" # define COMport number
@@ -31,8 +31,8 @@ mydmx = pysimpledmx.DMXConnection(COMport) # create dmx object
 
 # with light in upright position, @ tAngle = 45 and pAngle = 210, lamp is parallel to ground, lamp is perpendicular to flat edge
 
-tAngle = float(0.0)
-pAngle = float(0.0)
+tAngle = float(35.0)
+pAngle = float(200.0)
 
 # math for turning "real angles" into DMX values
 pAnglePercentage = pAngle/540
@@ -59,18 +59,20 @@ print "tcoarse = " + str(tAnglecoarse)
 
 # for reals sending values to DMX
 
-mydmx.setChannel(2,18)
-mydmx.setChannel(3,132)
+mydmx.setChannel(2,0)
+mydmx.setChannel(3,24)
 mydmx.setChannel(6, pAnglecoarse)
 mydmx.setChannel(7, pAnglefine)
 mydmx.setChannel(8, tAnglecoarse)
 mydmx.setChannel(9, tAnglefine)
 mydmx.setChannel(10, 250)
 
-time.sleep(5)
+mydmx.render()
+
+time.sleep(0.5)
 
 tAngle = float(45.0)
-pAngle = float(180.0)
+pAngle = float(210.0)
 
 # math for turning "real angles" into DMX values
 pAnglePercentage = pAngle/540
@@ -94,11 +96,10 @@ print "pcoarse = " + str(tAnglecoarse)
 print "tfine = " + str(tAnglefine)
 print "tcoarse = " + str(tAnglecoarse)
 
-
 # for reals sending values to DMX
 
-mydmx.setChannel(2,18)
-mydmx.setChannel(3,132)
+mydmx.setChannel(2,0)
+mydmx.setChannel(3,24)
 mydmx.setChannel(6, pAnglecoarse)
 mydmx.setChannel(7, pAnglefine)
 mydmx.setChannel(8, tAnglecoarse)
