@@ -45,13 +45,83 @@ def Loc_3D(dist0, dist1, dist2, Loc_1, Loc_2):
             
     return Position 
     
+"""
+This is assuming DuPlessie MiniMac, position control NOT velocity control (for now)
+Using mode 4 (16 bit, 10 channels) -> refer to manual to understand how to get to mode
 
+Pan is 540 degrees, tilt is 270 degrees
+Pan resolution is 0.013 degrees, tilt resolution is 0.007 degrees
+
+Relevant Channels (Mode 4)
+[5] pan (0 is left, 255 is right, 128 is neutral)
+[6] pan fine (0 is left, 255 is right)
+[7] pan (0 is up, 255 is down, 128 is neutral)
+[8] pan fine (0 is up, 255 is down)
+[9] pan/tilt speed
+	0 - 2: tracking mode
+	3 - 245: fast to slow
+	246 - 248: tracking, PtS = SLO
+	249 - 251: tracking, PtS = FST
+	252 - 255: black out while moving
+
+Currently NOT in a loop, just runs once
+"""
+
+import pysimpledmx # make sure it ais in same home directory
+import time
+
+COMport = "/dev/cu.usbserial-ENYXTLPV" # define COMport number
+
+mydmx = pysimpledmx.DMXConnection(COMport) # create dmx object
+
+# assuming that we are getting pan angle and tilt angle, make sure we're getting floats!
+
+# with light in upright position, @ tAngle = 45 and pAngle = 210, lamp is parallel to ground, lamp is perpendicular to flat edge
+
+
+
+
+def run_motor (tAngle, pAngle):
+
+    tAngle = float(tAngle)
+    pAngle = float(pAngle)
+    
+    # math for turning "real angles" into DMX values
+    pAnglePercentage = pAngle/540
+    tAnglePercentage = tAngle/270
+
+    pAngleDMX = int(round(pAnglePercentage*65535))
+    tAngleDMX = int(round(tAnglePercentage*65535))
+
+    pAngleDMX = format(pAngleDMX, '016b')
+    tAngleDMX = format(tAngleDMX, '016b')
+
+    pAnglefine = int(pAngleDMX[8:16],2)
+    pAnglecoarse = int(pAngleDMX[0:8],2)
+
+    tAnglefine = int(tAngleDMX[8:16],2)
+    tAnglecoarse = int(tAngleDMX[0:8],2)
+
+    print "pAngle = " + str(pAngle), "   tANgle = ", str(tAngle)
+
+    # for reals sending values to DMX
+
+    mydmx.setChannel(2,0)
+    mydmx.setChannel(3,24)
+    mydmx.setChannel(6, pAnglecoarse)
+    mydmx.setChannel(7, pAnglefine)
+    mydmx.setChannel(8, tAnglecoarse)
+    mydmx.setChannel(9, tAnglefine)
+    mydmx.setChannel(10, 250)
+    mydmx.render() # render all of the above changes onto the DMX network
+
+    time.sleep(0.1)
 ##########################################################################
 #user defined variables: port, count_average, num_output 
 
 #serial port address. Windows uses 'COM1', 'COM2'.. 
 #but MAC uses different types of address. 
-port = "COM2"
+port =  "/dev/cu.usbmodem1411"
 #motor_port = "COM13"
 
 
@@ -185,6 +255,8 @@ dist0 = []
 dist1 = []
 dist2 = []
 dist3 = []
+run_motor(0,0)
+sleep(3)
 # Will locate until told to stop
 
 Model_Tilt = 0
@@ -234,7 +306,7 @@ while totalcount < countupto * num_output :
 
             ###### Position Tracking
             Our_Space_Point = Loc_3D(dist_ta_a1, dist_ta_a2, dist_ta_a3, Loc_2, Loc_3)
-              
+            print 'space :', Our_Space_Point  
             ## PAN-TILT, Tilt 0 -> (0,0,-z), Pan 0 -> (-x ,0 ,0) for light behind point, (x,0,0) for light in front of point. 
 
             ## Light behind Tag
@@ -254,7 +326,8 @@ while totalcount < countupto * num_output :
             #Angle into String and setting len of string = 3 
             tAngle = int(Model_Tilt*360.0/(2*math.pi))
             pAngle = int(Model_Pan*360.0/(2*math.pi))
-            print 'Tilt_Angle :', tAngle , '   Pan_Angle :', pAngle 
+#            print 'Tilt_Angle :', tAngle , '   Pan_Angle :', pAngle
+            run_motor(0, pAngle)
                 
 #                locate_again = raw_input("Again? (y or n): ")
 #            time_end_tracking= time.clock()
@@ -272,7 +345,6 @@ ser.close() #end the communication
 
 
 ##########################################################################################
-
 
 
 

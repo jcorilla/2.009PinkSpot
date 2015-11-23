@@ -31,8 +31,8 @@ mydmx = pysimpledmx.DMXConnection(COMport) # create dmx object
 
 # with light in upright position, @ tAngle = 45 and pAngle = 210, lamp is parallel to ground, lamp is perpendicular to flat edge
 
-tAngle = float(35.0)
-pAngle = float(200.0)
+tAngle = float(70.0)
+pAngle = float(80.0)
 
 # math for turning "real angles" into DMX values
 pAnglePercentage = pAngle/540
@@ -69,10 +69,10 @@ mydmx.setChannel(10, 250)
 
 mydmx.render()
 
-time.sleep(0.5)
+time.sleep(5)
 
-tAngle = float(45.0)
-pAngle = float(210.0)
+tAngle = float(0.0)
+pAngle = float(0.0)
 
 # math for turning "real angles" into DMX values
 pAnglePercentage = pAngle/540
